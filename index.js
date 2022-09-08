@@ -8,17 +8,17 @@ app.use(cors());
 app.use(express.json({limit: '50mb'}));
 app.use(fileupload());
 
-// toppage
-app.post("/toppage", (req, res) => {
-    fs.writeFile('latterdb/toppage.json' ,`${JSON.stringify(req.body)}`, {flag: 'w'}, (err) => {
+// datetime
+app.post("/datetime", (req, res) => {
+    fs.writeFile('mapmainpage/datetime.json' ,`${JSON.stringify(req.body)}`, {flag: 'w'}, (err) => {
         if (err) console.log(err);
     });
     res.end();
 });
 
-app.get("/pulltoppage", (req, res) => {
+app.get("/pulldatetime", (req, res) => {
     try {
-        fs.readFile('latterdb/toppage.json', (err, data) => {
+        fs.readFile('mapmainpage/datetime.json', (err, data) => {
             try {
                 if (err) {
                     console.log(err);
@@ -33,16 +33,17 @@ app.get("/pulltoppage", (req, res) => {
         res.end(`${error}`);
     }
 });
-// toppage
+// datetime
 
-// promo
+// products
 var dataimage;
 app.post('/image', (req, res) => {
     dataimage = null;
     try {
         const image = req.files.image;
-        image.mv(`./img/promo/${image.name}`, () => {
-            fs.readFile(`./img/promo/${image.name}`, 'base64', (err, data) => {
+        image.mv(`./img/products/${image.name}`, () => {
+            // the image is enconded
+            fs.readFile(`./img/products/${image.name}`, 'base64', (err, data) => {
                 if (err) {
                     console.log("readfile" + err);
                 } else {
@@ -56,17 +57,18 @@ app.post('/image', (req, res) => {
     }
 });
 
-app.post('/promo', (req, res) => {
+app.post('/products', (req, res) => {
+    // the file is deleted here
     try {
-        var datapromo = [req.body];
+        var dataproducts = [req.body];
         if (dataimage == null) {
-            fs.rm(`./img/promo${req.body.imgname}`, (err) => {
+            fs.rm(`./img/products${req.body.imgname}`, (err) => {
                 if (err) console.log(err);
             });
             res.end("null");
         } else {
-            datapromo[0]['imgdata'] = `data:image/png;base64,${dataimage}`;
-            fs.readFile('latterdb/promo.json', (err, data) => {
+            dataproducts[0]['imgdata'] = `data:image/png;base64,${dataimage}`;
+            fs.readFile('mapmainpage/products.json', (err, data) => {
                 if (err) {
                     console.log(err);
                 } else {
@@ -75,18 +77,18 @@ app.post('/promo', (req, res) => {
                     for (count = 0; count < alterdata.length; count++) {
                         if (req.body.id == alterdata[count].id) {
                             a = true;
-                            fs.rm(`./img/promo${req.body.imgname}`, (err) => {
+                            fs.rm(`./img/products${req.body.imgname}`, (err) => {
                                 if (err) console.log(err);
                             });
                         }
                     }
                     if (a == false) {
-                        alterdata.push(datapromo[0]);
-                        fs.writeFile('latterdb/promo.json', `${JSON.stringify(alterdata)}`, { flag: 'w' }, (err) => {
+                        alterdata.push(dataproducts[0]);
+                        fs.writeFile('mapmainpage/products.json', `${JSON.stringify(alterdata)}`, { flag: 'w' }, (err) => {
                             if (err) {
                                 console.log(err);
                             } else {
-                                fs.rm(`./img/promo/${req.body.imgname}`, (err) => {
+                                fs.rm(`./img/products/${req.body.imgname}`, (err) => {
                                     if (err) console.log(err);
                                 });
                             }
@@ -97,7 +99,7 @@ app.post('/promo', (req, res) => {
             res.end();
         }
     } catch (error) {
-        fs.rm(`./img/promo/${req.body.imgname}`, (err) => {
+        fs.rm(`./img/products/${req.body.imgname}`, (err) => {
             if (err) console.log(err);
         });
         res.end(`${error}`);
@@ -106,9 +108,9 @@ app.post('/promo', (req, res) => {
     
 });
 
-app.post('/deletepromo', (req, res) => {
+app.post('/deleteproducts', (req, res) => {
     try {
-        fs.readFile('latterdb/promo.json', (err, data) => {
+        fs.readFile('mapmainpage/products.json', (err, data) => {
             if (err) {
                 console.log(err);
             } else {
@@ -116,7 +118,7 @@ app.post('/deletepromo', (req, res) => {
                 for (count = 0; count < alterdata.length; count++) {
                     if (req.body.id == alterdata[count].id) {
                         alterdata.splice(count, 1);
-                        fs.writeFile('latterdb/promo.json' ,`${JSON.stringify(alterdata)}`, {flag: 'w'}, (err) => {
+                        fs.writeFile('mapmainpage/products.json' ,`${JSON.stringify(alterdata)}`, {flag: 'w'}, (err) => {
                             if (err) console.log(err);
                         });
                     }
@@ -130,9 +132,9 @@ app.post('/deletepromo', (req, res) => {
     
 });
 
-app.get("/pullpromo", (req, res) => {
+app.get("/reqproducts", (req, res) => {
     try {
-        fs.readFile('latterdb/promo.json', (err, data) => {
+        fs.readFile('mapmainpage/products.json', (err, data) => {
             try {
                 var predata = new Array(JSON.parse(data));
                 if (err) {
@@ -151,21 +153,22 @@ app.get("/pullpromo", (req, res) => {
         res.end(`${error}`);
     }
 });
-// promo
+// products
 
-// destques
+// news
 
-var dataimgdestaques;
-app.post('/imgdestaques', (req, res) => {
-    dataimgdestaques = null;
+// the section is ctrl-c + ctrl-v with some differences
+var dataimgnews;
+app.post('/imgnews', (req, res) => {
+    dataimgnews = null;
     try {
         const imgnew = req.files.imgnew;
-        imgnew.mv(`./img/destaques/${imgnew.name}`, () => {
-            fs.readFile(`./img/destaques/${imgnew.name}`, 'base64', (err, data) => {
+        imgnew.mv(`./img/news/${imgnew.name}`, () => {
+            fs.readFile(`./img/news/${imgnew.name}`, 'base64', (err, data) => {
                 if (err) {
                     console.log("readfile" + err);
                 } else {
-                    dataimgdestaques = data;
+                    dataimgnews = data;
                 }
             });
             res.end();
@@ -175,17 +178,17 @@ app.post('/imgdestaques', (req, res) => {
     }
 });
 
-app.post('/destaques', (req, res) => {
+app.post('/news', (req, res) => {
     try {
-        var datadestaques = [req.body];
-        if (dataimgdestaques == null) {
-            fs.rm(`./img/destaques/${req.body.imgname}`, (err) => {
+        var datanews = [req.body];
+        if (dataimgnews == null) {
+            fs.rm(`./img/news/${req.body.imgname}`, (err) => {
                 if (err) console.log(err);
             });
             res.end("null");
         } else {
-            datadestaques[0]['imgdata'] = `data:image/png;base64,${dataimgdestaques}`;
-            fs.readFile('latterdb/destaques.json', (err, data) => {
+            datanews[0]['imgdata'] = `data:image/png;base64,${dataimgnews}`;
+            fs.readFile('mapmainpage/news.json', (err, data) => {
                 if (err) {
                     console.log(err);
                 } else {
@@ -194,18 +197,18 @@ app.post('/destaques', (req, res) => {
                     for (count = 0; count < alterdata.length; count++) {
                         if (req.body.id == alterdata[count].id) {
                             a = true;
-                            fs.rm(`./img/destaques/${req.body.imgname}`, (err) => {
+                            fs.rm(`./img/news/${req.body.imgname}`, (err) => {
                                 if (err) console.log(err);
                             });
                         }
                     }
                     if (a == false) {
-                        alterdata.push(datadestaques[0]);
-                        fs.writeFile('latterdb/destaques.json', `${JSON.stringify(alterdata)}`, { flag: 'w' }, (err) => {
+                        alterdata.push(datanews[0]);
+                        fs.writeFile('mapmainpage/news.json', `${JSON.stringify(alterdata)}`, { flag: 'w' }, (err) => {
                             if (err) {
                                 console.log(err)
                             } else {
-                                fs.rm(`./img/destaques/${req.body.imgname}`, (err) => {
+                                fs.rm(`./img/news/${req.body.imgname}`, (err) => {
                                     if (err) console.log(err);
                                 });
                             }
@@ -216,16 +219,16 @@ app.post('/destaques', (req, res) => {
             res.end();
         }
     } catch (error) {
-        fs.rm(`./img/destaques/${req.body.imgname}`, (err) => {
+        fs.rm(`./img/news/${req.body.imgname}`, (err) => {
             if (err) console.log(err);
         });
         res.end(`${error}`);
     }
 });
 
-app.post('/deldestaques', (req, res) => {
+app.post('/delnews', (req, res) => {
     try {
-        fs.readFile('latterdb/destaques.json', (err, data) => {
+        fs.readFile('mapmainpage/news.json', (err, data) => {
             if (err) {
                 console.log(err);
             } else {
@@ -233,7 +236,7 @@ app.post('/deldestaques', (req, res) => {
                 for (count = 0; count < alterdata.length; count++) {
                     if (req.body.id == alterdata[count].id) {
                         alterdata.splice(count, 1);
-                        fs.writeFile('latterdb/destaques.json' ,`${JSON.stringify(alterdata)}`, {flag: 'w'}, (err) => {
+                        fs.writeFile('mapmainpage/news.json' ,`${JSON.stringify(alterdata)}`, {flag: 'w'}, (err) => {
                             if (err) console.log(err);
                         });
                     }
@@ -246,9 +249,9 @@ app.post('/deldestaques', (req, res) => {
     }
 });
 
-app.get("/pulldestaques", (req, res) => {
+app.get("/pullnews", (req, res) => {
     try {
-        fs.readFile('latterdb/destaques.json', (err, data) => {
+        fs.readFile('mapmainpage/news.json', (err, data) => {
             try {
                 var predata = new Array(JSON.parse(data));
                 if (err) {
@@ -267,8 +270,8 @@ app.get("/pulldestaques", (req, res) => {
         res.end(`${error}`);
     }
 });
-// destaques
+// news
 
 app.listen(3001, () => {
-    console.log("Yey, your server is running on port 3001");
+    console.log("your server is running on port 3001");
 });
