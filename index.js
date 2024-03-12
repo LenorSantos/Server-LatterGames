@@ -5,11 +5,12 @@ const fs = require("fs");
 const fileupload = require('express-fileupload');
 
 app.use(cors());
-app.use(express.json({limit: '50mb'}));
+app.use(express.json({limit: '10mb'}));
 app.use(fileupload());
 
 // datetime
 app.post("/datetime", (req, res) => {
+    console.log(req.body);
     fs.writeFile('mapmainpage/datetime.json' ,`${JSON.stringify(req.body)}`, {flag: 'w'}, (err) => {
         if (err) console.log(err);
     });
@@ -57,54 +58,29 @@ app.post('/image', (req, res) => {
     }
 });
 
-app.post('/products', (req, res) => {
-    // the file is deleted here
+app.post('/sendpromos', (req, res) => {
     try {
         var dataproducts = [req.body];
-        if (dataimage == null) {
-            fs.rm(`./img/products${req.body.imgname}`, (err) => {
-                if (err) console.log(err);
-            });
-            res.end("null");
-        } else {
-            dataproducts[0]['imgdata'] = `data:image/png;base64,${dataimage}`;
-            fs.readFile('mapmainpage/products.json', (err, data) => {
-                if (err) {
-                    console.log(err);
-                } else {
+        req.files.img.mv(`./temp/${req.files.img.name}`, (err) => {
+            if (err) throw new Error(err);
+            fs.readFile(`./temp/${req.files.img.name}`, 'base64', (err, data) => {
+                if (err) throw new Error(err);
+                dataproducts[0]['imgdata'] = `data:image/png;base64,${data}`;
+                fs.readFile('mapmainpage/products.json', (err, data) => {
+                    if (err) throw new Error(err);
                     const alterdata = JSON.parse(data);
-                    var a = false;
-                    for (count = 0; count < alterdata.length; count++) {
-                        if (req.body.id == alterdata[count].id) {
-                            a = true;
-                            fs.rm(`./img/products${req.body.imgname}`, (err) => {
-                                if (err) console.log(err);
-                            });
-                        }
-                    }
-                    if (a == false) {
-                        alterdata.push(dataproducts[0]);
-                        fs.writeFile('mapmainpage/products.json', `${JSON.stringify(alterdata)}`, { flag: 'w' }, (err) => {
-                            if (err) {
-                                console.log(err);
-                            } else {
-                                fs.rm(`./img/products/${req.body.imgname}`, (err) => {
-                                    if (err) console.log(err);
-                                });
-                            }
-                        });
-                    }
-                }
+                    alterdata.push(dataproducts[0]);
+                    fs.writeFile('mapmainpage/products.json', `${JSON.stringify(alterdata)}`, { flag: 'w' }, (err) => {
+                        if (err) throw new Error(err);
+                        res.end();
+                    });
+                });
+                fs.rm(`./temp/${req.files.img.name}`, (err) => {if (err) throw new Error(err)});
             });
-            res.end();
-        }
-    } catch (error) {
-        fs.rm(`./img/products/${req.body.imgname}`, (err) => {
-            if (err) console.log(err);
         });
-        res.end(`${error}`);
+    } catch (err) {
+        res.send(err ?? "Save promo error");
     }
-
     
 });
 
@@ -132,7 +108,7 @@ app.post('/deleteproducts', (req, res) => {
     
 });
 
-app.get("/reqproducts", (req, res) => {
+app.get("/promos", (req, res) => {
     try {
         fs.readFile('mapmainpage/products.json', (err, data) => {
             try {
