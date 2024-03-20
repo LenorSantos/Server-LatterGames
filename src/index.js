@@ -3,6 +3,7 @@ const app = express();
 const cors = require("cors");
 const fs = require("fs");
 const fileupload = require('express-fileupload');
+const jwt = require("jsonwebtoken");
 
 app.use(cors());
 app.use(express.json({limit: '10mb'}));
@@ -11,17 +12,17 @@ app.use(fileupload());
 // nota, todos os arquivos de banco nosql devem comecar com [] para poder dar inicio corretamente
 
 // datetime
-app.post("/datetime", (req, res) => {
+app.post("/setdatetime", (req, res) => {
     console.log(req.body);
-    fs.writeFile('mapmainpage/datetime.json' ,`${JSON.stringify(req.body)}`, {flag: 'w'}, (err) => {
+    fs.writeFile('src/mapmainpage/datetime.json' ,`${JSON.stringify(req.body)}`, {flag: 'w'}, (err) => {
         if (err) console.log(err);
     });
     res.end();
 });
 
-app.get("/pulldatetime", (req, res) => {
+app.get("/datetime", (req, res) => {
     try {
-        fs.readFile('mapmainpage/datetime.json', (err, data) => {
+        fs.readFile('src/mapmainpage/datetime.json', (err, data) => {
             try {
                 if (err) {
                     console.log(err);
@@ -42,17 +43,18 @@ app.get("/pulldatetime", (req, res) => {
 app.post('/sendpromos', (req, res) => {
     try {
         var dataproducts = [req.body];
-        req.files.img.mv(`./temp/${req.files.img.name}`, (err) => {
+        req.files.img.mv(`src/temp/${req.files.img.name}`, (err) => {
             if (err) throw new Error(err);
-            fs.readFile(`./temp/${req.files.img.name}`, 'base64', (err, data) => {
+            fs.readFile(`src/temp/${req.files.img.name}`, 'base64', (err, data) => {
                 if (err) throw new Error(err);
+                dataproducts[0]['id'] = `${jwt.sign(req.body, `${req.body.title}`)}`;
                 dataproducts[0]['imgdata'] = `data:image/png;base64,${data}`;
-                fs.readFile('mapmainpage/products.json', (err, data) => {
+                fs.readFile('src/mapmainpage/products.json', (err, data) => {
                     if (err) throw new Error(err);
                     const alterdata = JSON.parse(data);
                     alterdata.push(dataproducts[0]);
-                    fs.writeFile('mapmainpage/products.json', `${JSON.stringify(alterdata)}`, { flag: 'w' }, (err) => {
-                        fs.rm(`./temp/${req.files.img.name}`, (err) => {if (err) throw new Error(err)});
+                    fs.writeFile('src/mapmainpage/products.json', `${JSON.stringify(alterdata)}`, { flag: 'w' }, (err) => {
+                        fs.rm(`src/temp/${req.files.img.name}`, (err) => {if (err) throw new Error(err)});
                         if (err) throw new Error(err);
                         res.status(201).end();
                     });
@@ -65,15 +67,15 @@ app.post('/sendpromos', (req, res) => {
     
 });
 
-app.delete('/delproducts/:title', (req, res) => {
+app.delete('/delproducts/:id', (req, res) => {
     try {
-        fs.readFile('mapmainpage/products.json', (err, data) => {
+        fs.readFile('src/mapmainpage/products.json', (err, data) => {
             if (err) throw new Error(err);
             const alterdata = JSON.parse(data);
             alterdata.forEach((element, index) => {
-                if (req.params.title === element.title) {
+                if (req.params.id === element.id) {
                     alterdata.splice(index, 1);
-                    fs.writeFile('mapmainpage/products.json', `${JSON.stringify(alterdata)}`, { flag: 'w' }, (err) => {
+                    fs.writeFile('src/mapmainpage/products.json', `${JSON.stringify(alterdata)}`, { flag: 'w' }, (err) => {
                         if (err) throw new Error(err);
                         res.status(200).send("deletado");
                     });
@@ -88,7 +90,7 @@ app.delete('/delproducts/:title', (req, res) => {
 
 app.get("/promos", (req, res) => {
     try {
-        fs.readFile('mapmainpage/products.json', (err, data) => {
+        fs.readFile('src/mapmainpage/products.json', (err, data) => {
             try {
                 var predata = new Array(JSON.parse(data));
                 if (err) {
@@ -141,7 +143,7 @@ app.post('/news', (req, res) => {
             res.end("null");
         } else {
             datanews[0]['imgdata'] = `data:image/png;base64,${dataimgnews}`;
-            fs.readFile('mapmainpage/news.json', (err, data) => {
+            fs.readFile('src/mapmainpage/news.json', (err, data) => {
                 if (err) {
                     console.log(err);
                 } else {
@@ -157,7 +159,7 @@ app.post('/news', (req, res) => {
                     }
                     if (a == false) {
                         alterdata.push(datanews[0]);
-                        fs.writeFile('mapmainpage/news.json', `${JSON.stringify(alterdata)}`, { flag: 'w' }, (err) => {
+                        fs.writeFile('src/mapmainpage/news.json', `${JSON.stringify(alterdata)}`, { flag: 'w' }, (err) => {
                             if (err) {
                                 console.log(err)
                             } else {
@@ -181,7 +183,7 @@ app.post('/news', (req, res) => {
 
 app.post('/delnews', (req, res) => {
     try {
-        fs.readFile('mapmainpage/news.json', (err, data) => {
+        fs.readFile('src/mapmainpage/news.json', (err, data) => {
             if (err) {
                 console.log(err);
             } else {
@@ -189,7 +191,7 @@ app.post('/delnews', (req, res) => {
                 for (count = 0; count < alterdata.length; count++) {
                     if (req.body.id == alterdata[count].id) {
                         alterdata.splice(count, 1);
-                        fs.writeFile('mapmainpage/news.json' ,`${JSON.stringify(alterdata)}`, {flag: 'w'}, (err) => {
+                        fs.writeFile('src/mapmainpage/news.json' ,`${JSON.stringify(alterdata)}`, {flag: 'w'}, (err) => {
                             if (err) console.log(err);
                         });
                     }
@@ -204,23 +206,22 @@ app.post('/delnews', (req, res) => {
 
 app.get("/pullnews", (req, res) => {
     try {
-        fs.readFile('mapmainpage/news.json', (err, data) => {
+        fs.readFile('src/mapmainpage/news.json', (err, data) => {
             try {
                 var predata = new Array(JSON.parse(data));
                 if (err) {
-                    console.log(err);
+                    if (err) throw new Error(err);
                 } else if (predata[0].length === 0) {
-                    res.end("{}");
+                    res.status(204).send("{}");
                 } else {
                     res.end(data);
                 }
             } catch (error) {
-                console.log(error);
-                res.end();
+                res.status(400).send(err);
             }
         });
     } catch (error) {
-        res.end(`${error}`);
+        res.status(400).send(err);
     }
 });
 // news
