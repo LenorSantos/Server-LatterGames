@@ -4,6 +4,7 @@ const cors = require("cors");
 const fs = require("fs");
 const fileupload = require('express-fileupload');
 const jwt = require("jsonwebtoken");
+const uniqid = require('uniqid'); 
 
 app.use(cors());
 app.use(express.json({limit: '10mb'}));
@@ -13,11 +14,16 @@ app.use(fileupload());
 
 // datetime
 app.post("/setdatetime", (req, res) => {
-    console.log(req.body);
-    fs.writeFile('src/mapmainpage/datetime.json' ,`${JSON.stringify(req.body)}`, {flag: 'w'}, (err) => {
-        if (err) console.log(err);
-    });
-    res.end();
+    try {
+        console.log(req.body);
+        fs.writeFile('src/mapmainpage/datetime.json', `${JSON.stringify(req.body)}`, { flag: 'w' }, (err) => {
+            if (err) throw new Error(err);
+            res.end();
+        });
+    } catch (err) {
+        res.status(400).send(err);
+    }
+
 });
 
 app.get("/datetime", (req, res) => {
@@ -37,7 +43,6 @@ app.get("/datetime", (req, res) => {
         res.end(`${error}`);
     };
 });
-// datetime
 
 // products
 app.post('/sendpromos', (req, res) => {
@@ -47,7 +52,7 @@ app.post('/sendpromos', (req, res) => {
             if (err) throw new Error(err);
             fs.readFile(`src/temp/${req.files.img.name}`, 'base64', (err, data) => {
                 if (err) throw new Error(err);
-                dataproducts[0]['id'] = `${jwt.sign(req.body, `${req.body.title}`)}`;
+                dataproducts[0]['id'] = `${uniqid(req.body.title)}`;
                 dataproducts[0]['imgdata'] = `data:image/png;base64,${data}`;
                 fs.readFile('src/mapmainpage/products.json', (err, data) => {
                     if (err) throw new Error(err);
@@ -108,11 +113,8 @@ app.get("/promos", (req, res) => {
         res.status(400).send(err);
     }
 });
-// products
 
 // news
-
-// the section is ctrl-c + ctrl-v with some differences
 var dataimgnews;
 app.post('/imgnews', (req, res) => {
     dataimgnews = null;
@@ -224,8 +226,8 @@ app.get("/pullnews", (req, res) => {
         res.status(400).send(err);
     }
 });
-// news
 
+// on server
 app.listen(3001, () => {
     console.log("your server is running on port 3001");
 });
