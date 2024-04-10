@@ -4,7 +4,7 @@ const delPromos = (req, res, fs) => {
             if (err) throw new Error(err);
             const alterdata = JSON.parse(data);
             alterdata.forEach((element, index) => {
-                if (req.params.id === element.id) {
+                if (req.query.id === element.id) {
                     alterdata.splice(index, 1);
                     fs.writeFile('src/mapmainpage/products.json', `${JSON.stringify(alterdata)}`, { flag: 'w' }, (err) => {
                         if (err) throw new Error(err);
