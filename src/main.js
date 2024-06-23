@@ -4,30 +4,49 @@ const cors = require("cors");
 const fs = require("fs");
 const fileupload = require('express-fileupload');
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 const uniqid = require('uniqid');
 const { promo } = require("./promos");
 const { datetime } = require("./datetime");
 const { news } = require("./news");
+const { cripto } = require("./login/cripto");
 require('dotenv/config');
 
 app.use(cors());
-app.use(express.json({limit: '10mb'}));
+app.use(express.json({ limit: '10mb' }));
 app.use(fileupload());
+const key = cripto();
 
 // nota, quase todos os arquivos de banco nosql devem comecar com [] para poder dar inicio corretamente
 // login
 app.get("/login", (req, res) => {
-    // console.log(req.query.initial);
-    if (req.query.initial) {
-        // var token = jwt.sign({data: req.query.initial}, process.env.JWT_PASS, {algorithm: 'HS256', expiresIn: 120});
-        // res.status(200).send(token);
-        res.status(200).end();
-    } else if (req.query.login) {
-        res.status(200).end();
-    } else {
-        res.status(400).end();
+    try {
+        res.status(200).send(key.publicKey)
+    } catch (err) {
+        console.log(err);
+        if (err) res.status(500).end();
     }
-})
+});
+app.post("/login", (req, res) => {
+    try {
+        // const convert = Buffer.from(req.body.login, 'base64');
+        // console.log(req.body.login);
+        // const token = jwt.sign({payload: req.query.login}, key.privateKey, {algorithm: 'HS512', expiresIn: "30s"});
+        // const decripto = 
+        crypto.privateDecrypt({
+            key: key.privateKey,
+            oaepHash: 'sha1',
+            padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
+            passphrase: process.env.CRYPTO_PASS,
+        }, Buffer.from(req.body.login, 'base64')).toString('utf8') == process.env.USER ? res.status(200).send({token: jwt.sign({payload: req.query.login}, key.privateKey, {algorithm: 'HS512', expiresIn: "30s"})}) : res.sendStatus(500).end();
+        // const test = decripto.toString('utf8');
+        // console.log(decripto);
+        // res.status(200).send({token: token});
+    } catch (err) {
+        console.log(err);
+        if (err) res.status(500).end();
+    }
+});
 
 // datetime
 app.all("/datetime", (req, res) => {
