@@ -30,12 +30,20 @@ app.get("/login", (req, res) => {
 });
 app.post("/login", (req, res) => {
     try {
+        // var hash = crypto.privateDecrypt({
+        //     key: key.privateKey,
+        //     oaepHash: 'sha1',
+        //     padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
+        //     passphrase: process.env.CRYPTO_PASS,
+        // }, Buffer.from(req.body.login, 'base64'));
+        // console.log(hash.toString('utf8'));
+        // console.log(process.env.REGENTE);
         crypto.privateDecrypt({
             key: key.privateKey,
             oaepHash: 'sha1',
             padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
             passphrase: process.env.CRYPTO_PASS,
-        }, Buffer.from(req.body.login, 'base64')).toString('utf8') == process.env.USER ? res.status(200).send({token: jwt.sign({payload: req.query.login}, key.privateKey, {algorithm: 'HS512', expiresIn: "5s"})}) : res.sendStatus(500).end();
+        }, Buffer.from(req.body.login, 'base64')).toString('utf8') == process.env.REGENTE ? res.status(200).send({token: jwt.sign({payload: req.query.login}, key.privateKey, {algorithm: 'HS512', expiresIn: "5s"})}) : res.sendStatus(500).end();
     } catch (err) {
         // console.log(err);
         if (err) res.status(500).end();
