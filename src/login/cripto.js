@@ -1,5 +1,5 @@
 const crypto = require("crypto");
-// passphrase: process.env.CRYPTO_PASS,
+
 const cripto = () => {
   const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
     modulusLength: 4096,
