@@ -1,6 +1,6 @@
 {
   "name": "server-lattergames",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "",
   "main": "src/main.js",
   "scripts": {
@@ -21,12 +21,5 @@
     "js-base64": "^3.7.2",
     "jsonwebtoken": "^9.0.2",
     "uniqid": "^5.4.0"
-  },
-  "bin": "src/main.js",
-  "pkg": {
-    "targets": [
-      "latest-win-x64",
-      "latest-linux-x64"
-    ]
   }
 }

@@ -1,22 +1,29 @@
 # Server-LatterGames
- My backend to manage my main page.
+Backend do projeto Latter Games.
 
- This is an update to Request-server-using-SQL doing local request.
+### Para executar:
 
-# pkg to compile
-
-Para instalar o compilador use esse comando:
+#### Inicialmente:
 ```
-npm i -g pkg
+npm i
+```
+Necessário para fazer a instação de todos os modulos.
+
+#### Execução:
+```
+npm start
 ```
 
-No arquivo package.json adicionar os seguintes comandos:
-```
-"bin": "src/index.js",
-"pkg": {
-    "targets": ["latest-win-x64"]
-}
-```
-Isso garante que o programa compile corretamente.
+#### Execução em modo de desenvolvimento:
 
-Assim realizar deploy, enviar o programa para um cliente, aplicar correções diversas e etc, fica mais facil já que não é necessário adicionar pacotes adicionais, tudo esta embutido no programa compilado.
+Instalar o nodemon global:
+```
+npm i -g nodemon
+```
+
+Depois:
+```
+npm run dev
+```
+
+##### Versão do node: *v22.12.0*
