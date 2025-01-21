@@ -10,6 +10,7 @@ const { promo } = require("./promos");
 const { datetime } = require("./datetime");
 const { news } = require("./news");
 const { cripto } = require("./login/cripto");
+const { checktoken } = require("./token/checktoken");
 require('dotenv/config');
 
 app.use(cors());
@@ -19,7 +20,27 @@ const key = cripto();
 
 // nota, quase todos os arquivos de banco nosql devem comecar com [] para poder dar inicio corretamente
 
+// middleware
+app.use((req, res, next) => {
+    switch (req.method) {
+        case 'GET':
+            next();
+            break;
+        case 'POST':
+            checktoken(privateKey = key.privateKey, req, res, next);
+            break;
+        case 'DELETE':
+            checktoken(privateKey = key.privateKey, req, res, next);
+            // next();
+            break;
+        default:
+            res.status(405).end();
+            break;
+    }
+});
+
 // login
+// rgt = REGENTE
 app.get("/login", (req, res) => {
     try {
         res.status(200).send(key.publicKey)
@@ -28,22 +49,15 @@ app.get("/login", (req, res) => {
         if (err) res.status(500).end();
     }
 });
+
 app.post("/login", (req, res) => {
     try {
-        // var hash = crypto.privateDecrypt({
-        //     key: key.privateKey,
-        //     oaepHash: 'sha1',
-        //     padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
-        //     passphrase: process.env.CRYPTO_PASS,
-        // }, Buffer.from(req.body.login, 'base64'));
-        // console.log(hash.toString('utf8'));
-        // console.log(process.env.REGENTE);
         crypto.privateDecrypt({
             key: key.privateKey,
             oaepHash: 'sha1',
             padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
             passphrase: process.env.CRYPTO_PASS,
-        }, Buffer.from(req.body.login, 'base64')).toString('utf8') == process.env.REGENTE ? res.status(200).send({token: jwt.sign({payload: req.query.login}, key.privateKey, {algorithm: 'HS512', expiresIn: "5s"})}) : res.sendStatus(500).end();
+        }, Buffer.from(req.body.login, 'base64')).toString('utf8') == process.env.REGENTE ? res.status(200).send({token: jwt.sign({rgt: req.query.login}, key.privateKey, {algorithm: 'HS512', expiresIn: "60m"})}) : res.sendStatus(500).end();
     } catch (err) {
         // console.log(err);
         if (err) res.status(500).end();
@@ -52,28 +66,18 @@ app.post("/login", (req, res) => {
 
 // datetime
 app.all("/datetime", (req, res) => {
-    console.log(req.headers);
     switch (req.method) {
         case 'GET':
             datetime.dateTime(res, fs);
             break;
         case 'POST':
-            datetime.setDateTime(req, res, fs);
+            datetime.setDateTime(req, res);
             break;
         default:
             res.status(405).end();
             break;
     }
 });
-
-// app.post("/setdatetime", (req, res) => {
-//     datetime.setDateTime(req, res, fs);
-// });
-
-// app.get("/datetime", (req, res) => {
-//     console.log(req.method);
-//     datetime.dateTime(res, fs);
-// });
 
 // products
 app.all('/promos', (req, res) => {
@@ -93,18 +97,6 @@ app.all('/promos', (req, res) => {
     }
 });
 
-// app.post('/sendpromos', (req, res) => {
-//     promo.sendPromos(req, res, uniqid, fs);
-// });
-
-// app.delete('/delpromos/:id', (req, res) => {
-//     promo.delPromos(req, res, fs);
-// });
-
-// app.get("/promos", (req, res) => {
-//     promo.promos(res, fs);
-// });
-
 // news
 app.all('/news', (req, res) => {
     switch (req.method) {
@@ -122,18 +114,6 @@ app.all('/news', (req, res) => {
             break;
     }
 });
-
-// app.post('/setnews', (req, res) => {
-//     news.setNews(req, res, uniqid, fs);
-// });
-
-// app.delete('/delnews/:id', (req, res) => {
-//     news.delNews(req, res, fs);
-// });
-
-// app.get("/news", (req, res) => {
-//     news.News(res, fs);
-// });
 
 // on server
 app.listen(3001, () => {
