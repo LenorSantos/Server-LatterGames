@@ -1,18 +1,21 @@
+const {request, response} = require("express");
 const jwt = require("jsonwebtoken");
-const express = require("express");
-const app = express();
 
-
-
-function checktoken(next) {
-  const token = app.request.headers.token;
-  console.log(token);
-  app.response.status(200).end();
-  // jwt.verify(token, (err, decoded) => {
-  //   if (err) console.log(err);
-  //   console.log(decoded);
-  //   app.response.status(200).end();
-  // });
+function checktoken(privateKey, req = request, res = response, next) {
+  if (req.headers.authorization) {
+    jwt.verify(req.headers.authorization, privateKey, (err, decoded) => {
+      // console.log(err);
+      if (err) {
+        res.status(401).end();
+      } else {
+        next();
+      }
+    });
+  } else if (req.originalUrl === "/login") {
+    next();
+  } else {
+    res.status(401).end();
+  }
 };
 
-module.exports = {checktoken};
+module.exports = { checktoken };
