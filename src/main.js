@@ -20,8 +20,6 @@ app.use(fileupload());
 const key = cripto();
 const port = process.env.PORT || 80;
 
-// nota, quase todos os arquivos de banco nosql devem comecar com [] para poder dar inicio corretamente
-
 // middleware
 app.use((req, res, next) => {
     switch (req.method) {
@@ -29,12 +27,12 @@ app.use((req, res, next) => {
             next();
             break;
         case 'POST':
-            // checktoken(privateKey = key.privateKey, req, res, next);
-            next();
+            checktoken(privateKey = key.privateKey, req, res, next);
+            // next();
             break;
         case 'DELETE':
-            // checktoken(privateKey = key.privateKey, req, res, next);
-            next();
+            checktoken(privateKey = key.privateKey, req, res, next);
+            // next();
             break;
         default:
             res.status(405).end();
@@ -48,13 +46,13 @@ app.get("/login", (req, res) => {
     try {
         res.status(200).send(key.publicKey)
     } catch (err) {
-        // console.log(err);
         if (err) res.status(500).end();
     }
 });
 
 app.post("/login", (req, res) => {
     try {
+        // Por enquanto o set de admin terá de reinicializar o sistema visando reiniciar todos os tokens e keys
         crypto.privateDecrypt({
             key: key.privateKey,
             oaepHash: 'sha1',
@@ -62,7 +60,6 @@ app.post("/login", (req, res) => {
             passphrase: process.env.CRYPTO_PASS,
         }, Buffer.from(req.body.login, 'base64')).toString('utf8') == process.env.REGENTE ? res.status(200).send({token: jwt.sign({rgt: req.query.login}, key.privateKey, {algorithm: 'HS512', expiresIn: "60m"})}) : res.sendStatus(500).end();
     } catch (err) {
-        // console.log(err);
         if (err) res.status(500).end();
     }
 });

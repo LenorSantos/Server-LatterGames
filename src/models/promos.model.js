@@ -10,5 +10,4 @@ const promoSchema = new mongoose.Schema({
   versionKey: false,
 });
 
-// para deixar a collection no singular adicionar o nome da collection novamente após a constante
 module.exports = mongoose.model('promo', promoSchema,);

@@ -15,6 +15,4 @@ async function connectDB() {
   }
 }
 
-// run().catch(console.dir);
-
 module.exports = { connectDB };

@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 
 const datetimeSchema = new mongoose.Schema({
-    time: { type: String, require: true },
-    date: { type: String, require: true }
+    time: { type: String },
+    date: { type: String }
 }, {
     versionKey: false,
 });
