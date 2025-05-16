@@ -117,8 +117,12 @@ app.get('/', (req, res) => {
     res.status(200).send("Servidor funcionando, por favor verifique as demais funcionalidades.");
 });
 
+// iniciarlizar conexão com o mongodb
+connectDB();
+
 // on server
-app.listen(port, () => {
-    console.log("your server is running on port 3001");
-    connectDB();
-});
+// app.listen(port, () => {
+//     console.log("your server is running on port 3001");
+// });
+
+module.exports = app;
