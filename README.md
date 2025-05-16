@@ -26,4 +26,11 @@ Depois:
 npm run dev
 ```
 
+#### Compilar para produção com esbuild
+```
+npm run build
+```
+
+Tudo está preconfigurado do *package.json*.
+
 ##### Versão do node: *v22.12.0*
