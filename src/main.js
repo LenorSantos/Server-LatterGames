@@ -17,6 +17,7 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(fileupload());
 const key = cripto();
+const port = process.env.PORT || 80;
 
 // nota, quase todos os arquivos de banco nosql devem comecar com [] para poder dar inicio corretamente
 
@@ -116,6 +117,6 @@ app.all('/news', (req, res) => {
 });
 
 // on server
-app.listen(3001, () => {
+app.listen(port, () => {
     console.log("your server is running on port 3001");
 });
