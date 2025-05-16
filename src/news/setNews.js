@@ -1,7 +1,7 @@
 const {request, response} = require("express");
 const newsModels = require("../models/news.models");
 
-const setNews = (req = request, res = response, uniqid, fs) => {
+const setNews = (req = request, res = response) => {
     try {
 
         new newsModels({

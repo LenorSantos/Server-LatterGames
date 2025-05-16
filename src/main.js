@@ -1,11 +1,9 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
-const fs = require("fs");
 const fileupload = require('express-fileupload');
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
-const uniqid = require('uniqid');
 const { promo } = require("./promos");
 const { datetime } = require("./datetime");
 const { news } = require("./news");
@@ -68,7 +66,7 @@ app.post("/login", (req, res) => {
 app.all("/datetime", (req, res) => {
     switch (req.method) {
         case 'GET':
-            datetime.dateTime(res, fs);
+            datetime.dateTime(res);
             break;
         case 'POST':
             datetime.setDateTime(req, res);
@@ -83,13 +81,13 @@ app.all("/datetime", (req, res) => {
 app.all('/promos', (req, res) => {
     switch (req.method) {
         case 'GET':
-            promo.promos(res, fs);
+            promo.promos(res);
             break;
         case 'POST':
-            promo.sendPromos(req, res, uniqid, fs);
+            promo.sendPromos(req, res);
             break;
         case 'DELETE':
-            promo.delPromos(req, res, fs);
+            promo.delPromos(req, res);
             break;
         default:
             res.status(405).end();
@@ -101,13 +99,13 @@ app.all('/promos', (req, res) => {
 app.all('/news', (req, res) => {
     switch (req.method) {
         case 'GET':
-            news.News(res, fs);
+            news.News(res);
             break;
         case 'POST':
-            news.setNews(req, res, uniqid, fs);
+            news.setNews(req, res);
             break;
         case 'DELETE':
-            news.delNews(req, res, fs);
+            news.delNews(req, res);
             break;
         default:
             res.status(405).end();

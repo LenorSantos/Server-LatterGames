@@ -1,7 +1,7 @@
 const {request, response} = require("express");
 const promosModel = require("../models/promos.model");
 
-const sendPromos = (req = request, res = response, uniqid, fs) => {
+const sendPromos = (req = request, res = response) => {
     try {
 
         new promosModel({
