@@ -1,20 +1,19 @@
-const delPromos = (req, res, fs) => {
+const {request, response} = require("express");
+const promosModel = require("../models/promos.model");
+
+const delPromos = (req = request, res = response, fs) => {
     try {
-        fs.readFile('src/mapmainpage/products.json', (err, data) => {
+
+        promosModel.deleteOne({
+            _id: req.query.id
+        }).then(result => {
+            res.status(200).end();
+        }).catch(err => {
             if (err) throw new Error(err);
-            const alterdata = JSON.parse(data);
-            alterdata.forEach((element, index) => {
-                if (req.query.id === element.id) {
-                    alterdata.splice(index, 1);
-                    fs.writeFile('src/mapmainpage/products.json', `${JSON.stringify(alterdata)}`, { flag: 'w' }, (err) => {
-                        if (err) throw new Error(err);
-                        res.status(200).send("deletado");
-                    });
-                };
-            });
-        });
+        })
+
     } catch (err) {
-        res.status(400).send(err);
+        res.status(400).send(err ?? 'impossivel apagar promoção selecionada');
     };
 };
 
