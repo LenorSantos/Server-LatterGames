@@ -4,7 +4,7 @@
   "description": "Servidor da plataforma lattergames",
   "main": "src/main.js",
   "scripts": {
-    "start": "node src/main.js",
+    "start": "node dist/main.js",
     "dev": "nodemon --ignore src/mapmainpage/ src/main.js",
     "build": "esbuild src/main.js --bundle --platform=node --outdir=dist"
   },
