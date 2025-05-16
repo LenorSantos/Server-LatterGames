@@ -11,6 +11,7 @@ const { datetime } = require("./datetime");
 const { news } = require("./news");
 const { cripto } = require("./login/cripto");
 const { checktoken } = require("./token/checktoken");
+const { connectDB } = require("./mongodb/configMongo");
 require('dotenv/config');
 
 app.use(cors());
@@ -28,11 +29,12 @@ app.use((req, res, next) => {
             next();
             break;
         case 'POST':
-            checktoken(privateKey = key.privateKey, req, res, next);
+            // checktoken(privateKey = key.privateKey, req, res, next);
+            next();
             break;
         case 'DELETE':
-            checktoken(privateKey = key.privateKey, req, res, next);
-            // next();
+            // checktoken(privateKey = key.privateKey, req, res, next);
+            next();
             break;
         default:
             res.status(405).end();
@@ -116,7 +118,12 @@ app.all('/news', (req, res) => {
     }
 });
 
+app.get('/', (req, res) => {
+    res.status(200).send("Servidor funcionando, por favor verifique as demais funcionalidades.");
+});
+
 // on server
 app.listen(port, () => {
     console.log("your server is running on port 3001");
+    connectDB();
 });

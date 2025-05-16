@@ -21,10 +21,11 @@
     "fs": "^0.0.1-security",
     "js-base64": "^3.7.2",
     "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.14.3",
     "uniqid": "^5.4.0"
   },
   "type": "commonjs",
   "devDependencies": {
-    "esbuild": "^0.24.2"
+    "esbuild": "^0.25.4"
   }
 }
