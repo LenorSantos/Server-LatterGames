@@ -12,24 +12,36 @@ const { checktoken } = require("./token/checktoken");
 const { connectDB } = require("./mongodb/configMongo");
 require('dotenv/config');
 
+// iniciarlizar conexão com o mongodb
+connectDB();
+
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(fileupload());
-const key = cripto();
+const key = async () => {
+    return await cripto().then(result => {
+        return {
+            publicKey: result.publicKey,
+            privateKey: result.privateKey,
+        }
+    });
+};;
 const port = process.env.PORT || 80;
 
 // middleware
-app.use((req, res, next) => {
+app.use(async (req, res, next) => {
     switch (req.method) {
         case 'GET':
             next();
             break;
         case 'POST':
-            checktoken(privateKey = key.privateKey, req, res, next);
+            // checktoken(privateKey = key.privateKey, req, res, next);
+            checktoken(privateKey = (await key()).privateKey, req, res, next);
             // next();
             break;
         case 'DELETE':
-            checktoken(privateKey = key.privateKey, req, res, next);
+            // checktoken(privateKey = key.privateKey, req, res, next);
+            checktoken(privateKey = (await key()).privateKey, req, res, next);
             // next();
             break;
         default:
@@ -39,20 +51,21 @@ app.use((req, res, next) => {
 });
 
 // login
-// rgt = REGENTE
-app.get("/login", (req, res) => {
+app.get("/login", async (req, res) => {
     try {
-        res.status(200).send(key.publicKey)
+        // res.status(200).send(key.publicKey);
+        res.status(200).send((await key()).publicKey);
     } catch (err) {
         if (err) res.status(500).end();
     }
 });
 
-app.post("/login", (req, res) => {
+// rgt = REGENTE
+app.post("/login", async (req, res) => {
     try {
-        // Por enquanto o set de admin terá de reinicializar o sistema visando reiniciar todos os tokens e keys
         crypto.privateDecrypt({
-            key: key.privateKey,
+            // key: key.privateKey,
+            key: await key.then(result => {return result.privateKey}),
             oaepHash: 'sha1',
             padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
             passphrase: process.env.CRYPTO_PASS,
@@ -61,6 +74,7 @@ app.post("/login", (req, res) => {
         if (err) res.status(500).end();
     }
 });
+// login
 
 // datetime
 app.all("/datetime", (req, res) => {
@@ -117,12 +131,9 @@ app.get('/', (req, res) => {
     res.status(200).send("Servidor funcionando, por favor verifique as demais funcionalidades.");
 });
 
-// iniciarlizar conexão com o mongodb
-connectDB();
-
 // on server
-// app.listen(port, () => {
-//     console.log("your server is running on port 3001");
-// });
+app.listen(port, () => {
+    console.log("your server is running on port 3001");
+});
 
 module.exports = app;

@@ -1,6 +1,6 @@
 {
   "name": "server-lattergames",
-  "version": "3.0.1",
+  "version": "3.3.0",
   "description": "Servidor da plataforma lattergames",
   "main": "src/main.js",
   "scripts": {
